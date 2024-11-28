@@ -33,7 +33,6 @@ private:
     mutex* fork2;
     bool done_eating = false;
 
-    vector<double> thinkingTimes;
     vector<double> waitingTimes;
     vector<double> eatingTimes;
 
@@ -41,12 +40,6 @@ private:
         report_mutex.lock();
         cout << "PHILOSOPHER " << id << " EATING TIMES: ";
         for (auto &time : eatingTimes) {
-            cout << time << "s ";
-        }
-        cout << endl;
-
-        cout << "PHILOSOPHER " << id << " THINKING TIMES: ";
-        for (const double& time : thinkingTimes) {
             cout << time << "s ";
         }
         cout << endl;
@@ -87,21 +80,14 @@ private:
         double sleep_time = min_time + offset;
         this_thread::sleep_for(chrono::duration<float>(sleep_time));
 
-        if (!verb.compare("eating")) {
+        if (verb == "eating") {
             this->eatingTimes.push_back(sleep_time);
-        }
-        if (!verb.compare("thinking")) {
-            this->thinkingTimes.push_back(sleep_time);
         }
     }
 
     void acquire_forks(){
-        auto start = chrono::steady_clock::now();
         fork1->lock();
         fork2->lock(); 
-        auto end = chrono::steady_clock::now();
-        chrono::duration<double> elapsed = end - start;
-        this->waitingTimes.push_back(elapsed.count());
     }
 
     void release_forks(){
@@ -123,8 +109,16 @@ public:
 
         // start dining
         while (!done_eating) {
+            // track time spent before grabbing forks
+            auto start = chrono::steady_clock::now();
+
             this->sleep("thinking", MIN_THINK, MIN_THINK + DURATION);
             this->acquire_forks();
+
+            auto end = chrono::steady_clock::now();
+            chrono::duration<double> elapsed = end - start;
+            this->waitingTimes.push_back(elapsed.count());
+
             this->eat();
             this->release_forks();
         }
