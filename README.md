@@ -18,7 +18,7 @@ This approach ensures that not all philosophers are competing for the same fork 
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/dining-philosophers-cpp.git
+git clone https://github.com/rennyhoang/dining-philosophers.git
 cd dining-philosophers-cpp
 ```
 
