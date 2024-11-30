@@ -9,10 +9,10 @@
 #include <stdexcept> // For exceptions
 
 // Constants for simulation parameters
-#define DURATION 2                // Maximum additional duration to add to minimum times
+#define DURATION 0.5                // Maximum additional duration to add to minimum times
 #define MAX_FOOD 30               // Total amount of food available
-#define MIN_THINK 2               // Minimum time a philosopher spends thinking
-#define MIN_EAT 1                 // Minimum time a philosopher spends eating
+#define MIN_THINK 0.5               // Minimum time a philosopher spends thinking
+#define MIN_EAT 0.25                 // Minimum time a philosopher spends eating
 #define NUM_FORK 7                // Number of forks (same as number of philosophers)
 #define NUM_PHILOSOPHER 7         // Number of philosophers
 
@@ -28,6 +28,7 @@ condition_variable start_cv;     // Condition variable to synchronize the start 
 bool start = false;              // Flag indicating whether philosophers can start dining
 
 mutex report_mutex;              // Mutex to protect reporting output
+double contention_time = 0;      // Track experimental result
 
 // Philosopher class representing each philosopher in the simulation
 class Philosopher {
@@ -60,6 +61,7 @@ private:
         cout << "PHILOSOPHER " << id << " HUNGRY TIMES: ";
         for (const double& time : hungryTimes) {
             cout << time << "s ";
+            contention_time += time;
         }
         cout << endl << endl;
     }
@@ -71,8 +73,8 @@ private:
 
         if (food > 0) {
             food--;
-            food_mutex.unlock();
             cout << "PHILOSOPHER " << id << " IS EATING. FOOD LEFT: " << food << endl;
+            food_mutex.unlock();
         } else {
             // No food left, philosopher is done eating
             food_mutex.unlock();
@@ -85,7 +87,7 @@ private:
     }
 
     // Function to simulate sleeping (thinking or eating)
-    void sleep(const string& verb, int min_time, int max_time){
+    void sleep(const string& verb, double min_time, double max_time){
         // Validate arguments
         if (min_time < 0 || max_time < 0 || max_time < min_time) {
             cerr << "PHILOSOPHER " << id << ": INVALID MIN AND MAX TIME" << endl;
@@ -168,16 +170,9 @@ public:
         // Start dining
         while (!done_eating) {
             try {
-                // Simulate thinking
                 this->sleep("thinking", MIN_THINK, MIN_THINK + DURATION);
-
-                // Acquire forks
                 this->acquire_forks();
-
-                // Eat
                 this->eat();
-
-                // Release forks
                 this->release_forks();
             } catch (const exception& e) {
                 cerr << "PHILOSOPHER " << id << ": Exception occurred: " << e.what() << endl;
@@ -257,6 +252,8 @@ int main() {
 
     // Make sure food is modified correctly
     cout << "There is " << food << " food left." << endl;
+    // See how much time was spent waiting
+    cout << "Philosophers waited a total of " << contention_time << "s." << endl;
 
     return EXIT_SUCCESS;
 }
