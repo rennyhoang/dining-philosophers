@@ -46,4 +46,4 @@ The output includes:
 - A report of each philosopher's eating times, thinking times, and hungry times.
 - The amount of food left at the end.
 
-Each philosopher will also write their contention times to a text file called "report-<id>.txt" 
+Each philosopher will also write their contention times to a text file called "report-\<id\>.txt" 
