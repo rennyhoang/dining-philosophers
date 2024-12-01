@@ -25,7 +25,7 @@ cd dining-philosophers-cpp
 2. Compile the program
 
 ```bash
-g++ -std=c++11 -pthread dining_philosophers.cpp -o dining_philosophers
+g++ dining_philosophers.cpp
 ```
 
 ## Running the program
@@ -33,15 +33,17 @@ g++ -std=c++11 -pthread dining_philosophers.cpp -o dining_philosophers
 After building the project, run the executable:
 
 ```bash
-./dining_philosophers
+./a.out
 ```
 
 ## Program Output
 
 The output includes:
 
-- Initialization messages.
+- Initialization message.
 - Countdown before dining starts.
-- Messages indicating when a philosopher is eating, thinking, or waiting.
+- Messages indicating when a philosopher is eating.
 - A report of each philosopher's eating times, thinking times, and hungry times.
 - The amount of food left at the end.
+
+Each philosopher will also write their contention times to a text file called "report-<id>.txt" 

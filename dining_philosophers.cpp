@@ -10,10 +10,10 @@
 #include <thread>
 #include <vector>
 
-#define DURATION 2
+#define DURATION 0.5
 #define MAX_FOOD 30
-#define MIN_THINK 2
-#define MIN_EAT 1
+#define MIN_THINK 0.5
+#define MIN_EAT 0.5
 #define NUM_FORK 7 
 #define NUM_PHILOSOPHER 7
 
