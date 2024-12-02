@@ -61,6 +61,7 @@ private:
         }
         report_mutex.unlock();
 
+        // contention = hungry / (thinking + eating + hungry)
         double hungryTime = accumulate(hungryTimes.begin(), hungryTimes.end(), 0.0);
         double thinkingTime = accumulate(thinkingTimes.begin(), thinkingTimes.end(), 0.0);
         double eatingTime = accumulate(eatingTimes.begin(), eatingTimes.end(), 0.0);
@@ -69,6 +70,7 @@ private:
 
         double contention_level = hungryTime / overallTime * 100;
 
+        // append contention to respective file
         ofstream reportFile("report-" + to_string(id) + ".txt", ios::app);
         reportFile << contention_level << endl;
         reportFile.close();
@@ -91,6 +93,7 @@ private:
     }
 
     void sleep(const string& verb, double min_time, double max_time){
+        // boundary checking
         if (min_time < 0 || max_time < 0 || max_time < min_time) {
             cerr << "PHILOSOPHER " << id << ": INVALID MIN AND MAX TIME" << endl;
             throw invalid_argument("Invalid min and max time for sleep");
@@ -101,6 +104,7 @@ private:
 
         this_thread::sleep_for(chrono::duration<double>(sleep_time));
 
+        // put time in respective vector
         if (verb == "eating") {
             this->eatingTimes.push_back(sleep_time);
         }
@@ -114,6 +118,7 @@ private:
     }
 
     void acquire_forks(){
+        // track time spent hungry
         auto start_time = chrono::steady_clock::now();
 
         try {
@@ -143,14 +148,17 @@ public:
     void operator()(int id, int fork1_index, int fork2_index){
         this->id = id;
 
+        // boundary checking
         if (fork1_index < 0 || fork1_index >= NUM_FORK || fork2_index < 0 || fork2_index >= NUM_FORK) {
             cerr << "PHILOSOPHER " << id << ": Invalid fork indices" << endl;
             throw out_of_range("Fork index out of range");
         }
 
+        // assign forks
         this->fork1 = &forks[fork1_index];
         this->fork2 = &forks[fork2_index];
 
+        // wait for signal to start
         {
             unique_lock<mutex> lock(start_mtx);
             start_cv.wait(lock, []{ return start; });
@@ -164,7 +172,7 @@ public:
                 this->release_forks();
             } catch (const exception& e) {
                 cerr << "PHILOSOPHER " << id << ": Exception occurred: " << e.what() << endl;
-                // Make sure forks are released if an exception occurs
+                // make sure forks are released if an exception occurs
                 this->release_forks();
                 break;
             }
@@ -175,10 +183,12 @@ public:
 };
 
 int main() {
+    // seed RNG
     srand(static_cast<unsigned int>(time(NULL)));
 
     vector<thread> philosophers;
 
+    // asymmetric solution to deadlocks
     try {
         for(int id = 0; id < NUM_PHILOSOPHER; id++){
             int fork1_index, fork2_index;
@@ -200,7 +210,7 @@ int main() {
 
     cout << "Philosophers initialized." << endl;
 
-    // Make sure all philosophers start at the same time
+    // make sure all philosophers start at the same time
     cout << "Philosophers start dining in 3..." << endl;
     this_thread::sleep_for(chrono::seconds(1));
     cout << "2..." << endl;
@@ -209,7 +219,7 @@ int main() {
     this_thread::sleep_for(chrono::seconds(1));
     cout << "EAT!!!" << endl;
 
-    // Notify all philosophers to start dining
+    // notify all philosophers to start
     start_mtx.lock();
     start = true;
     start_mtx.unlock();
@@ -225,6 +235,7 @@ int main() {
         }
     }
 
+    // make sure there is 0 food left
     cout << endl << endl;
     cout << "There is " << food << " food left." << endl;
 
