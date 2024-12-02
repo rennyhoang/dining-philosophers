@@ -1,4 +1,4 @@
-# Dining Philosophers Problem in C++
+# Dining Philosophers Problem
 
 ## Overview
 
