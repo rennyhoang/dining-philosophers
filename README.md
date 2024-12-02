@@ -36,6 +36,8 @@ After building the project, run the executable:
 ./a.out
 ```
 
+If you want to change the variables of the problem, the appropriate constants are near the top of the source file.
+
 ## Program Output
 
 The output includes:
